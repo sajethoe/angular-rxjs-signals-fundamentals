@@ -22,15 +22,14 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
-    this.sub = this.productService.getProducts().pipe(
-      tap(() => console.log('In component pipeline'))
-    )
-    .subscribe(
-      products => {
-        this.products = products,
-        console.log('end on init', this.products)
-      }
-    );
+    this.sub = this.productService.getProducts()
+      .pipe(
+        tap((products) => {
+          console.log('In component pipeline'), 
+          this.products = products,
+          console.log('end on init', this.products)})
+      )
+      .subscribe();
   }
 
   ngOnDestroy(): void {
