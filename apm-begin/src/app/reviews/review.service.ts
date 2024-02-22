@@ -10,6 +10,7 @@ export class ReviewService {
   getReviewUrl(productId: number): string {
     // Use appropriate regular expression syntax to
     // get an exact match on the id
-    return this.reviewsUrl + '?productId=^' + productId + '$';
+    return `${this.reviewsUrl}?productId=^${productId}$`;
+    // return this.reviewsUrl + '?productId=^' + productId + '$';
   }
 }
