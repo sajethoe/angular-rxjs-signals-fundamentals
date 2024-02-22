@@ -16,24 +16,22 @@ export class ProductService {
   private reviewService = inject(ReviewService);
 
   private productsUrl = 'api/products';
-
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.productsUrl)
+  readonly products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       tap(() => console.log('In http get pipeline')),
       catchError((err) => this.handleError(err))
-      );
-    }
+    );
+
     
-    getProduct(id: number): Observable<Product> {
-      const productUrl = `${this.productsUrl}/${id}`;
-      return this.http.get<Product>(productUrl)
-        .pipe(
-          tap(() => console.log(`In http.get by id (${id}) in pipeline`)),
-          switchMap(product => this.getProductWithReviews(product)),
-          tap(x => console.log(x)),
-          catchError((err) => this.handleError(err))
-        );
+  getProduct(id: number): Observable<Product> {
+    const productUrl = `${this.productsUrl}/${id}`;
+    return this.http.get<Product>(productUrl)
+      .pipe(
+        tap(() => console.log(`In http.get by id (${id}) in pipeline`)),
+        switchMap(product => this.getProductWithReviews(product)),
+        tap(x => console.log(x)),
+        catchError((err) => this.handleError(err))
+      );
   }
 
   private getProductWithReviews(product: Product): Observable<Product> {
