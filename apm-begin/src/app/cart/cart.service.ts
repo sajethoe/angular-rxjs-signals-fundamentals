@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, signal } from "@angular/core";
 import { CartItem } from "./cart";
 import { Product } from "../products/product";
+import { filter } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -24,5 +25,17 @@ export class CartService {
   addToCart(product: Product): void {
     // read the cartitem array from the signal
     this.cartItems.update(items => [...items, { product, quantity: 1}]);
+  }
+
+  updateQuantity(cartItem: CartItem, quantity: number): void {
+    this.cartItems.update(items => 
+      items.map(item => item.product.id === cartItem.product.id ? 
+        { ...item, quantity} : item))
+  }
+
+  removeFromCart(cartItem: CartItem): void {
+    this.cartItems.update(items => 
+      items.filter(item => item.product.id !== cartItem.product.id)
+    )
   }
 }
