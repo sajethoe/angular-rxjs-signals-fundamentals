@@ -1,8 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, catchError, map, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, combineLatest, filter, map, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { Product } from './product';
-import { ProductData } from './product-data';
 import { HttpErrorService } from '../utilities/http-error.service';
 import { ReviewService } from '../reviews/review.service';
 import { Review } from '../reviews/review';
@@ -27,7 +26,7 @@ export class ProductService {
       catchError((err) => this.handleError(err))
     );
 
-  readonly product$ = this.productSelected$
+  readonly product1$ = this.productSelected$
     .pipe(
       switchMap(id => {
         const productUrl = `${this.productsUrl}/${id}`;
@@ -38,7 +37,19 @@ export class ProductService {
             catchError((err) => this.handleError(err))
           );
       })
-    )
+    );
+  
+  product$ = combineLatest([
+    this.productSelected$,
+    this.products$
+  ]).pipe(
+      map(([selectedProductId, products]) => 
+        products.find(product => product.id === selectedProductId)
+      ),
+      filter(Boolean), // filter out null or undefined values
+      switchMap(product => this.getProductWithReviews(product)),
+      catchError((err) => this.handleError(err))
+    );
   
   productSelected(selectedProductId: number): void {
     this.productSelectedSubject.next(selectedProductId);
