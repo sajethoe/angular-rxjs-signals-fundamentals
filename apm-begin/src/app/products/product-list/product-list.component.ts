@@ -1,56 +1,37 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
-import { NgIf, NgFor, NgClass } from '@angular/common';
-import { Product } from '../product';
+import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { ProductService } from '../product.service';
-import { EMPTY, Subscription, catchError, tap } from 'rxjs';
+import { EMPTY, catchError, tap } from 'rxjs';
 
 @Component({
     selector: 'pm-product-list',
     templateUrl: './product-list.component.html',
     standalone: true,
-  imports: [NgIf, NgFor, NgClass, ProductDetailComponent]
+  imports: [NgIf, NgFor, NgClass, ProductDetailComponent, AsyncPipe]
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent {
   private productService = inject(ProductService);
   
   pageTitle = 'Products';
   errorMessage = '';
-  sub!: Subscription;
-
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    this.sub = this.productService.getProducts()
-      .pipe(
-        tap(() => console.log('In component pipeline')),
-        catchError((err) => {
-          this.errorMessage = err;
-          return EMPTY;
-        })        
-      )
-      .subscribe({
-        next: (products) => {
-          this.products = products,
-          console.log('end on init', this.products)
-        },
-      });
-  }
-
-  ngOnDestroy(): void {
-    //Called once, before the instance is destroyed.
-    //Add 'implements OnDestroy' to the class.
-    this.sub.unsubscribe();
-  }
 
   // Products
-  products: Product[] = [];
+  readonly products$ = this.productService.products$
+  .pipe(
+    catchError((err) => {
+      this.errorMessage = err;
+      return EMPTY;
+    })        
+  );  
 
   // Selected product id to highlight the entry
-  selectedProductId: number = 0;
+  // selectedProductId: number = 0;
+  readonly selectedProductId$ = this.productService.productSelected$;
 
   onSelected(productId: number): void {
-    this.selectedProductId = productId;
+    // this.selectedProductId = productId;
+    this.productService.productSelected(productId);
   }
 }
